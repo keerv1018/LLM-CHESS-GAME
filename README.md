@@ -1,5 +1,3 @@
-# LLM-CHESS-GAME
-
 # Chess Game - 2 Player & AI
 A fully functional chess game with two-player mode and AI opponent capabilities using LLM APIs (OpenAI GPT-4, Google Gemini, or Anthropic Claude).
 
@@ -8,14 +6,14 @@ This chess application was developed as part of the BharatX Tech Intern 1st Task
 
 # Features 
 - Two-player mode allowing humans to play against each other
-- AI opponent mode powered by LLM APIs
+- AI opponent mode supported by LLMs
 - Functional chessboard UI with legal move validation
 - Move history tracking
 - Choose to play as white or black against AI
 - Game state indication: Shows check, checkmate, draws
 
 
-# Playing Against AI :
+# Instructions to play with AI :
 To play against AI
 1. Click the "Play vs AI" button
 2. Select your preferred AI model
@@ -26,10 +24,10 @@ To play against AI
 4. Choose whether to play as white or black
 5. Start playing!
 
-## Live Demo
+# Live Demo
 The simplest way to use this is to open the `index.html` file directly in your browser.
 
-## API Keys
+# API Keys
 You will need to enter your own API keys for the AI services:
 
 **Google Gemini**    : Get API key from [Google AI Studio](https://makersuite.google.com/)
@@ -40,10 +38,10 @@ You will need to enter your own API keys for the AI services:
 
 # Technical Details
  - Frontend      : HTML, CSS, JavaScript
- - Chess Engine  : chess.js library for move validation and game state
  - AI Integration: RESTful API calls to various LLM providers
+ - Imported chess.js library for move validation and game state
 
-## Development
+# Development
 This is a pure client-side application with no build requirements. Just open the `index.html` file to run locally.
 
 
