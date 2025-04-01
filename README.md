@@ -33,7 +33,9 @@ The simplest way to use this is to open the `index.html` file directly in your b
 You will need to enter your own API keys for the AI services:
 
 **Google Gemini**    : Get API key from [Google AI Studio](https://makersuite.google.com/)
+
 **OpenAI GPT-4**     : Get API key from [OpenAI](https://platform.openai.com/)
+
 **Anthropic Claude** : Get API key from [Anthropic](https://console.anthropic.com/)
 
 # Technical Details
