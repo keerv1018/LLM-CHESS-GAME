@@ -41,7 +41,5 @@ You will need to enter your own API keys for the AI services:
  - AI Integration: RESTful API calls to various LLM providers
  - Imported chess.js library for move validation and game state
 
-# Development
-This is a pure client-side application with no build requirements. Just open the `index.html` file to run locally.
 
 
