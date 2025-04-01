@@ -1,1 +1,700 @@
+<!-- BHARATX TASK 1
+     VUNDAVALLI SRI SAI KEERTHI -->
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chess Game - 2 Player & AI</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            padding: 20px;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        
+        .controls {
+            margin: 20px 0;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        button:hover {
+            background-color: #45a049;
+        }
+        
+        .status {
+            margin: 15px 0;
+            padding: 10px;
+            background-color: #f1f1f1;
+            border-radius: 4px;
+            text-align: center;
+        }
+        
+        .chessboard {
+            width: 400px;
+            height: 400px;
+            margin: 0 auto;
+            border: 2px solid #333;
+        }
+        
+        .row {
+            display: flex;
+            height: 12.5%;
+        }
+        
+        .square {
+            width: 12.5%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 36px;
+            cursor: pointer;
+        }
+        
+        .white {
+            background-color: #f0d9b5;
+        }
+        
+        .black {
+            background-color: #b58863;
+        }
+        
+        .selected {
+            background-color: rgba(144, 238, 144, 0.5);
+        }
+        
+        .move-history {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+        
+        .api-section {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #e9f7ef;
+            border-radius: 4px;
+            display: none;
+        }
+        
+        .api-key {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        
+        .model-selection {
+            margin-bottom: 15px;
+        }
+        
+        .thinking {
+            text-align: center;
+            font-style: italic;
+            margin: 10px 0;
+            display: none;
+        }
+        
+        /* chess-piece symbols */
+        .piece {
+            user-select: none;
+        }
+    
+        
+        .illegal-move {
+            color: red;
+            font-weight: bold;
+            text-align: center;
+            margin: 10px 0;
+            display: none;
+        }
+        
+        .api-message {
+            color: #ff8c00;
+            text-align: center;
+            margin: 10px 0;
+            padding: 8px;
+            border-radius: 4px;
+            background-color: #fff3e0;
+            display: none;
+        }
+        
+        .game-mode {
+            margin: 15px 0;
+            text-align: center;
+        }
+        
+        .game-mode button {
+            margin: 0 5px;
+        }
+        
+        .active-mode {
+            background-color: #2E7D32;
+        }
+        
+        .player-color {
+            margin: 15px 0;
+            text-align: center;
+            display: none;
+        }
+        
+        .player-color button {
+            margin: 0 5px;
+        }
+        
+        .active-color {
+            background-color: #2E7D32;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Chess Game</h1>
+        
+        <div class="game-mode">
+            <button id="twoPlayerMode" class="active-mode">2 Player Game</button>
+            <button id="aiMode">Play vs AI</button>
+        </div>
+        
+        <div class="player-color" id="playerColorSection">
+            <h3>Choose Your Color</h3>
+            <button id="playWhite" class="active-color">Play as White</button>
+            <button id="playBlack">Play as Black</button>
+        </div>
+        
+        <div class="api-section" id="apiSection">
+            <h3>AI Settings</h3>
+            <div>
+                <label for="apiKey">Your LLM API Key:</label>
+                <input type="password" id="apiKey" class="api-key" placeholder="Enter your API key">
+            </div>
+            
+            <div class="model-selection">
+                <h4>Select AI Model</h4>
+                <div>
+                    <input type="radio" id="gemini" name="model" value="gemini" checked>
+                    <label for="gemini">Google Gemini</label>
+                </div>
+                <div>
+                    <input type="radio" id="gpt4" name="model" value="gpt4">
+                    <label for="gpt4">OpenAI GPT-4</label>
+                </div>
+                <div>
+                    <input type="radio" id="claude" name="model" value="claude">
+                    <label for="claude">Anthropic Claude</label>
+                </div>
+            </div>
+        </div>
+        
+        <div class="status" id="status">White's turn to move</div>
+        <div class="illegal-move" id="illegalMove">Illegal move!</div>
+        <div class="api-message" id="apiMessage"></div>
+        
+        <div class="controls">
+            <button id="newGame">New Game</button>
+        </div>
+        
+        <div class="thinking" id="thinking">AI is thinking...</div>
+        
+        <div class="chessboard" id="board"></div>
+        
+        <div class="move-history">
+            <h3>Move History</h3>
+            <div id="moves"></div>
+        </div>
+    </div>
+    <script>
+        // game state variables
+        let game = new Chess();
+        let selectedSquare = null;
+        let isAiGame = false;
+        let isAiTurn = false;
+        let humanColor = 'w'; 
+        let retryCount = 0;
+        let maxRetries = 2;
+        
+        // DOM references 
+        const boardElement = document.getElementById('board');
+        const statusElement = document.getElementById('status');
+        const movesElement = document.getElementById('moves');
+        const thinkingElement = document.getElementById('thinking');
+        const illegalMoveElement = document.getElementById('illegalMove');
+        const apiMessageElement = document.getElementById('apiMessage');
+        const apiSectionElement = document.getElementById('apiSection');
+        const playerColorSection = document.getElementById('playerColorSection');
+        const twoPlayerModeBtn = document.getElementById('twoPlayerMode');
+        const aiModeBtn = document.getElementById('aiMode');
+        const playWhiteBtn = document.getElementById('playWhite');
+        const playBlackBtn = document.getElementById('playBlack');
+        
+        // initialize the chess board
+        function initializeBoard() {
+            boardElement.innerHTML = '';
+            
+            for (let i = 0; i < 8; i++) {
+                const row = document.createElement('div');
+                row.className = 'row';
+                
+                for (let j = 0; j < 8; j++) {
+                    const square = document.createElement('div');
+                    
+                    // calculate coordinates
+                    const rowIdx = 7 - i;
+                    const colIdx = j;
+                    
+                    // set square color
+                    square.className = 'square ' + ((rowIdx + colIdx) % 2 === 0 ? 'white' : 'black');
+                    
+                    // set data attributes for getting position
+                    const file = String.fromCharCode(97 + colIdx);
+                    const rank = rowIdx + 1;
+                    square.setAttribute('data-position', file + rank);
+                    
+                    // add piece if there is one
+                    const piece = getPieceAt(file + rank);
+                    if (piece) {
+                        square.innerHTML = `<span class="piece">${getPieceSymbol(piece)}</span>`;
+                    }
+                    
+                    square.addEventListener('click', () => handleSquareClick(file + rank));
+                    
+                    row.appendChild(square);
+                }
+                
+                boardElement.appendChild(row);
+            }
+        }
+        
+        // get chess piece at given position
+        function getPieceAt(position) {
+            const piece = game.get(position);
+            return piece ? piece : null;
+        }
+        
+        // convert chess.js piece object to Unicode chess symbol
+        function getPieceSymbol(piece) {
+            const symbols = {
+                'w': {
+                    'p': '♙', 'n': '♘', 'b': '♗', 'r': '♖', 'q': '♕', 'k': '♔'
+                },
+                'b': {
+                    'p': '♟', 'n': '♞', 'b': '♝', 'r': '♜', 'q': '♛', 'k': '♚'
+                }
+            };
+            
+            return symbols[piece.color][piece.type];
+        }
+        
+        // handle clicks
+        function handleSquareClick(position) {
+           
+            illegalMoveElement.style.display = 'none';
+            apiMessageElement.style.display = 'none';
+            
+            if (game.game_over() || (isAiGame && isAiTurn)) {
+                return;
+            }
+            
+            // if no square is selected
+            if (!selectedSquare) {
+                const piece = getPieceAt(position);
+                if (piece && piece.color === game.turn()) {
+                    selectedSquare = position;
+                    
+                    // highlight the selected square
+                    document.querySelector(`[data-position="${position}"]`).classList.add('selected');
+                }
+            } 
+            // if a square is already selected
+            else {
+                // remove selection highlight
+                document.querySelector(`[data-position="${selectedSquare}"]`).classList.remove('selected');
+                
+                // try to make a move
+                if (selectedSquare !== position) {
+                    const move = game.move({
+                        from: selectedSquare,
+                        to: position,
+                        promotion: 'q'
+                    });
+                    
+                    if (move) {
+                        // update the board
+                        updateBoard();
+                        updateStatus();
+                        updateMoveHistory();
+                        
+                        // if the game is not over and it's AI turn
+                        if (!game.game_over() && isAiGame) {
+                            isAiTurn = true;
+                            thinkingElement.style.display = 'block';
+                            retryCount = 0;
+                            
+                            // wait a moment before getting AI's move
+                            setTimeout(() => {
+                                getAiMove();
+                            }, 500);
+                        }
+                    } else {
+                        // show illegal move message
+                        illegalMoveElement.style.display = 'block';
+                        setTimeout(() => {
+                            illegalMoveElement.style.display = 'none';
+                        }, 2000);
+                    }
+                }
+                
+                selectedSquare = null;
+            }
+        }
+        
+        // update the visual board based on the game state
+        function updateBoard() {
+            const squares = document.querySelectorAll('.square');
+            squares.forEach(square => {
+                const position = square.getAttribute('data-position');
+                const piece = getPieceAt(position);
+                
+                if (piece) {
+                    square.innerHTML = `<span class="piece">${getPieceSymbol(piece)}</span>`;
+                } else {
+                    square.innerHTML = '';
+                }
+            });
+        }
+        
+        // update game status
+        function updateStatus() {
+            let status = '';
+            
+            if (game.in_checkmate()) {
+                status = game.turn() === 'w' ? 'Game over, black wins by checkmate!' : 'Game over, white wins by checkmate!';
+            } else if (game.in_draw()) {
+                status = 'Game over, drawn position';
+            } else if (game.in_stalemate()) {
+                status = 'Game over, drawn by stalemate';
+            } else if (game.in_threefold_repetition()) {
+                status = 'Game over, drawn by repetition';
+            } else if (game.insufficient_material()) {
+                status = 'Game over, drawn by insufficient material';
+            } else {
+                status = (game.turn() === 'w' ? 'White' : 'Black') + ' to move';
+                
+                if (game.in_check()) {
+                    status += ', ' + (game.turn() === 'w' ? 'White' : 'Black') + ' is in check';
+                }
+                
+                if (isAiGame && isAiTurn) {
+                    status += ' (AI thinking...)';
+                }
+            }
+            
+            statusElement.textContent = status;
+        }
+        
+        // update the move history
+        function updateMoveHistory() {
+            movesElement.textContent = game.pgn();
+        }
+        
+        // make a random legal move for AI
+        function makeRandomMove() {
+            const legalMoves = game.moves();
+            if (legalMoves.length > 0) {
+                const randomMove = legalMoves[Math.floor(Math.random() * legalMoves.length)];
+                game.move(randomMove);
+                updateBoard();
+                updateStatus();
+                updateMoveHistory();
+            }
+        }
+        
+        // show API message without alerts
+        function showApiMessage(message, isError = false) {
+            apiMessageElement.textContent = message;
+            apiMessageElement.style.backgroundColor = isError ? '#ffe6e6' : '#fff3e0';
+            apiMessageElement.style.color = isError ? '#d32f2f' : '#ff8c00';
+            apiMessageElement.style.display = 'block';
+            
+            //auto-hide after 4 seconds
+            setTimeout(() => {
+                apiMessageElement.style.display = 'none';
+            }, 4000);
+        }
+        
+        //validate API key exists
+        function validateApiKey() {
+            const apiKey = document.getElementById('apiKey').value;
+            if (!apiKey || apiKey.trim() === '') {
+                showApiMessage('Please enter your API key first', true);
+                return false;
+            }
+            return true;
+        }
+        
+        // get the AI's move from the selected LLM
+        async function getAiMove() {
+            if (!validateApiKey()) {
+                isAiTurn = false;
+                thinkingElement.style.display = 'none';
+                return;
+            }
+            
+            try {
+                const apiKey = document.getElementById('apiKey').value;
+                const boardFen = game.fen();
+                const selectedModel = document.querySelector('input[name="model"]:checked').value;
+                
+                let endpoint, headers, requestBody;
+                
+                switch (selectedModel) {
+                    case 'gemini':
+                        endpoint = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent';
+                        headers = {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${apiKey}`
+                        };
+                        requestBody = {
+                            contents: [{
+                                parts: [{
+                                    text: `You are a chess-playing assistant. I'll provide you with the current state of a chess game in FEN notation, and I want you to suggest the next best move for ${game.turn() === 'w' ? 'white' : 'black'}.
+                                    
+Current board state (FEN): ${boardFen}
+Previous moves: ${game.history().join(', ')}
+Please analyze the board position and suggest a single valid chess move in standard algebraic notation (e.g., "e4", "Nf3", "Bxc6"). Only provide the move itself without any additional explanation or commentary. The move should be legal according to standard chess rules.`
+                                }]
+                            }],
+                            generationConfig: {
+                                temperature: 0.2,
+                                maxOutputTokens: 100
+                            }
+                        };
+                        break;
+                    
+                    case 'gpt4':
+                        endpoint = 'https://api.openai.com/v1/chat/completions';
+                        headers = {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${apiKey}`
+                        };
+                        requestBody = {
+                            model: "gpt-4",
+                            messages: [
+                                {
+                                    role: "system",
+                                    content: "You are a chess-playing assistant. You will receive the current state of a chess game and need to suggest the next best move."
+                                },
+                                {
+                                    role: "user",
+                                    content: `Current board state (FEN): ${boardFen}
+                                    
+Previous moves: ${game.history().join(', ')}
+Suggest a single valid chess move in standard algebraic notation (e.g., "e4", "Nf3", "Bxc6") for ${game.turn() === 'w' ? 'white' : 'black'}. Only provide the move itself without any additional explanation or commentary.`
+                                }
+                            ],
+                            temperature: 0.2,
+                            max_tokens: 50
+                        };
+                        break;
+                        
+                    case 'claude':
+                        endpoint = 'https://api.anthropic.com/v1/messages';
+                        headers = {
+                            'Content-Type': 'application/json',
+                            'x-api-key': apiKey,
+                            'anthropic-version': '2023-06-01'
+                        };
+                        requestBody = {
+                            model: "claude-3-opus-20240229",
+                            max_tokens: 50,
+                            temperature: 0.2,
+                            messages: [
+                                {
+                                    role: "user",
+                                    content: `You are a chess-playing assistant. I'll provide you with the current state of a chess game in FEN notation, and I want you to suggest the next best move for ${game.turn() === 'w' ? 'white' : 'black'}.
+                                    
+Current board state (FEN): ${boardFen}
+Previous moves: ${game.history().join(', ')}
+Please analyze the board position and suggest a single valid chess move in standard algebraic notation (e.g., "e4", "Nf3", "Bxc6"). Only provide the move itself without any additional explanation or commentary. The move should be legal according to standard chess rules.`
+                                }
+                            ]
+                        };
+                        break;
+                }
+                
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: headers,
+                    body: JSON.stringify(requestBody)
+                });
+                
+                if (!response.ok) {
+                    throw new Error("API error");
+                }
+                
+                const data = await response.json();
+                let aiMove;
+                
+                switch (selectedModel) {
+                    case 'gemini':
+                        aiMove = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+                        break;
+                    case 'gpt4':
+                        aiMove = data.choices?.[0]?.message?.content?.trim();
+                        break;
+                    case 'claude':
+                        aiMove = data.content?.[0]?.text?.trim();
+                        break;
+                }
+                
+                if (!aiMove) {
+                    throw new Error("No valid move returned from API");
+                }
+                
+                // clean up the move (remove any non-move text)
+                aiMove = aiMove.replace(/[^a-zA-Z0-9\-=+x]/g, '');
+                
+                // make the AI move
+                const move = game.move(aiMove);
+                
+                // if move is invalid, try a fallback approach
+                if (move === null) {
+                    // Try again with a retry
+                    if (retryCount < maxRetries) {
+                        retryCount++;
+                        setTimeout(() => {
+                            getAiMove();
+                        }, 1000);
+                        return;
+                    } else {
+                        //after max retries, make a random move
+                        makeRandomMove();
+                    }
+                } else {
+                    // valid move was made
+                    updateBoard();
+                    updateStatus();
+                    updateMoveHistory();
+                }
+            } catch (error) {
+                //silently make a random move on error detection
+                makeRandomMove();
+            } finally {
+                isAiTurn = false;
+                thinkingElement.style.display = 'none';
+            }
+        }
+        
+        // Start new game
+        function startNewGame(aiGame = false) {
+            isAiGame = aiGame;
+            game = new Chess();
+            selectedSquare = null;
+            
+            if (isAiGame) {
+                isAiTurn = (humanColor === 'b');
+                if (isAiTurn) {
+                    thinkingElement.style.display = 'block';
+                    setTimeout(() => {
+                        getAiMove();
+                    }, 500);
+                }
+            } else {
+                isAiTurn = false;
+            }
+            
+            illegalMoveElement.style.display = 'none';
+            apiMessageElement.style.display = 'none';
+            
+            initializeBoard();
+            updateStatus();
+            updateMoveHistory();
+            
+            showApiMessage(`New ${isAiGame ? 'AI' : '2-player'} game started`);
+        }
+        
+        // Initialize the game from start
+        document.addEventListener('DOMContentLoaded', function() {
+            //start with 2-player game by default
+            startNewGame(false);
+            
+            //set up event listeners
+            document.getElementById('newGame').addEventListener('click', function() {
+                startNewGame(isAiGame);
+            });
+            
+            twoPlayerModeBtn.addEventListener('click', function() {
+                isAiGame = false;
+                twoPlayerModeBtn.classList.add('active-mode');
+                aiModeBtn.classList.remove('active-mode');
+                apiSectionElement.style.display = 'none';
+                playerColorSection.style.display = 'none';
+                startNewGame(false);
+            });
+            
+            aiModeBtn.addEventListener('click', function() {
+                isAiGame = true;
+                twoPlayerModeBtn.classList.remove('active-mode');
+                aiModeBtn.classList.add('active-mode');
+                apiSectionElement.style.display = 'block';
+                playerColorSection.style.display = 'block';
+                startNewGame(true);
+            });
+            
+            playWhiteBtn.addEventListener('click', function() {
+                humanColor = 'w';
+                playWhiteBtn.classList.add('active-color');
+                playBlackBtn.classList.remove('active-color');
+                startNewGame(true);
+            });
+            
+            playBlackBtn.addEventListener('click', function() {
+                humanColor = 'b';
+                playBlackBtn.classList.add('active-color');
+                playWhiteBtn.classList.remove('active-color');
+                startNewGame(true);
+            });
+        });
+    </script>
+</body>
+</html>
