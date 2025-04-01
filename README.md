@@ -1,7 +1,7 @@
 # Chess Game - 2 Player & AI
 A fully functional chess game with two-player mode and AI opponent capabilities using LLM APIs (OpenAI GPT-4, Google Gemini, or Anthropic Claude).
+![game photo](https://github.com/user-attachments/assets/7f808792-2eb1-44f9-bfd5-b696ee479793)
 
-![WhatsApp Image 2025-04-01 at 17 38 13](https://github.com/user-attachments/assets/a853cd6c-5caf-48b7-ac82-f9577f53f118)
 
 
 # Project Overview
